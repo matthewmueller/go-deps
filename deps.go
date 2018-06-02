@@ -29,30 +29,30 @@ func Find(pkgs ...string) (deps []string, err error) {
 	}
 
 	// go source
-	gosrc := filepath.Join(build.Default.GOPATH, "src")
+	gopath := filepath.Join(build.Default.GOPATH, "src")
 
 	// tap into package resolution
-	conf.FindPackage = func(ctxt *build.Context, importPath, fromDir string, mode build.ImportMode) (*build.Package, error) {
-		// ignore stdlib files
-		if std.In(importPath) {
-			return ctxt.Import(importPath, gosrc, mode)
-		}
+	conf.FindPackage = func(context *build.Context, path, srcDir string, mode build.ImportMode) (*build.Package, error) {
+		gosrc := gopath
 
-		// HACK to handle go source's own vendoring
-		// here: $GOROOT/src/vendor/
-		// e.g. /usr/local/go/src/vendor/
-		if strings.HasPrefix(importPath, "golang_org/") {
-			importPath = "vendor/" + importPath
+		if strings.HasPrefix(path, "golang_org/") {
+			path = "vendor/" + path
 			gosrc = filepath.Join(build.Default.GOROOT, "src")
 		}
 
-		pkg, err := ctxt.Import(importPath, gosrc, mode)
+		pkg, err := context.Import(path, srcDir, mode)
 		if err != nil {
 			return pkg, err
 		}
 
+		// ignore stdlib files
+		if std.In(path) {
+			return pkg, nil
+		}
+
+		// append all the gofiles
 		for _, file := range pkg.GoFiles {
-			deps = append(deps, filepath.Join(gosrc, importPath, file))
+			deps = append(deps, filepath.Join(gosrc, path, file))
 		}
 
 		return pkg, nil
@@ -65,7 +65,7 @@ func Find(pkgs ...string) (deps []string, err error) {
 
 	// import all the packages
 	for _, file := range files {
-		rel, err := filepath.Rel(gosrc, file)
+		rel, err := filepath.Rel(gopath, file)
 		if err != nil {
 			return nil, err
 		}

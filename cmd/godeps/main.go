@@ -5,13 +5,13 @@ import (
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
-	"github.com/matthewmueller/deps"
+	deps "github.com/matthewmueller/go-deps"
 )
 
 func main() {
 	log.SetHandler(cli.Default)
 
-	deps, err := deps.Find(os.Args[1:]...)
+	deps, err := deps.FindWithTests(os.Args[1:]...)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

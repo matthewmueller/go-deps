@@ -200,6 +200,7 @@ func FindTests(packages ...string) (mains []string, err error) {
 			results = append(results, path.Join(gosrc, parts[2]))
 		}
 	}
+
 	return results, nil
 }
 

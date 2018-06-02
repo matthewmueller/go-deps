@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/matthewmueller/deps/internal/mains"
-	"github.com/matthewmueller/deps/internal/std"
+	"github.com/matthewmueller/go-deps/internal/mains"
+	"github.com/matthewmueller/go-deps/internal/std"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/loader"
 )
@@ -18,6 +18,49 @@ func Find(pkgs ...string) (deps []string, err error) {
 		return deps, nil
 	}
 
+	files, err := mains.Find(pkgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	resolve := func(pkg *build.Package) (files []string) {
+		for _, file := range pkg.GoFiles {
+			files = append(files, file)
+		}
+		return files
+	}
+
+	return find(resolve, files...)
+}
+
+// FindWithTests finds dependencies with tests
+func FindWithTests(pkgs ...string) (deps []string, err error) {
+	if len(pkgs) == 0 {
+		return deps, nil
+	}
+
+	files, err := mains.FindTests(pkgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	resolve := func(pkg *build.Package) (files []string) {
+		for _, file := range pkg.GoFiles {
+			files = append(files, file)
+		}
+		for _, file := range pkg.TestGoFiles {
+			files = append(files, file)
+		}
+		for _, file := range pkg.XTestGoFiles {
+			files = append(files, file)
+		}
+		return files
+	}
+
+	return find(resolve, files...)
+}
+
+func find(resolve func(pkg *build.Package) []string, files ...string) (deps []string, err error) {
 	var conf loader.Config
 
 	// only parse imports
@@ -50,17 +93,12 @@ func Find(pkgs ...string) (deps []string, err error) {
 			return pkg, nil
 		}
 
-		// append all the gofiles
-		for _, file := range pkg.GoFiles {
+		// use our resolve function to know what to watch
+		for _, file := range resolve(pkg) {
 			deps = append(deps, filepath.Join(gosrc, path, file))
 		}
 
 		return pkg, nil
-	}
-
-	files, err := mains.Find(pkgs...)
-	if err != nil {
-		return nil, err
 	}
 
 	// import all the packages
@@ -78,9 +116,4 @@ func Find(pkgs ...string) (deps []string, err error) {
 	}
 
 	return deps, nil
-}
-
-// FindWithTests finds dependencies with tests
-func FindWithTests(pkgs ...string) (deps []string, err error) {
-	return deps, err
 }

@@ -3,8 +3,10 @@ package deps
 import (
 	"go/build"
 	"go/parser"
+	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/matthewmueller/go-deps/internal/mains"
 	"github.com/matthewmueller/go-deps/internal/std"
@@ -115,5 +117,36 @@ func find(resolve func(pkg *build.Package) []string, files ...string) (deps []st
 		return nil, errors.Wrap(err, "unable to load the go package")
 	}
 
-	return deps, nil
+	return exists(deps), nil
+}
+
+func exists(files []string) (exists []string) {
+	l := len(files)
+
+	arr := make([]string, l)
+	wg := &sync.WaitGroup{}
+	wg.Add(l)
+
+	fn := func(i int, file string) {
+		if _, err := os.Stat(file); err == nil {
+			arr[i] = file
+		}
+		wg.Done()
+	}
+
+	for i, file := range files {
+		go fn(i, file)
+	}
+	wg.Wait()
+
+	cache := map[string]bool{}
+	for _, file := range arr {
+		if file == "" || cache[file] {
+			continue
+		}
+		exists = append(exists, file)
+		cache[file] = true
+	}
+
+	return exists
 }

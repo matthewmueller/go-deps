@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/matthewmueller/go-deps.svg)](https://pkg.go.dev/github.com/matthewmueller/go-deps)
 
-Walk the files that your package depends on.
+Walk Go files that your package depends on.
 
 ## Features
 

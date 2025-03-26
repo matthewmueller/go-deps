@@ -1,0 +1,6 @@
+github.com/livebud/mod v0.0.4 h1:YRxRVxSflnrXlzDEDg79NgWsBiGU573obRDBo14O7Ks=
+github.com/livebud/mod v0.0.4/go.mod h1:UYNTDT9l3DtCIPuutQWcYXZzLTFqrjfF3giFhHBZc9c=
+github.com/matryer/is v1.4.1 h1:55ehd8zaGABKLXQUe2awZ99BD/PTc2ls+KV/dXphgEQ=
+github.com/matryer/is v1.4.1/go.mod h1:8I/i5uYgLzgsgEloJE1U6xx5HkBQpAZvepWuujKwMRU=
+golang.org/x/mod v0.24.0 h1:ZfthKaKaT4NrhGVZHO1/WDTwGES4De8KtWO0SIbNJMU=
+golang.org/x/mod v0.24.0/go.mod h1:IXM97Txy2VM4PJ3gI61r1YEk/gAj6zAHN3AdZt6S9Ww=

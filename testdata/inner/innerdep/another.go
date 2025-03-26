@@ -1,0 +1,5 @@
+package innerdep
+
+func Another() {
+
+}
